@@ -1,0 +1,48 @@
+# Ambiente virtual
+venv/
+.env/
+*.venv/
+
+# Arquivos de configuração sensíveis
+*.env
+*.ini
+*.cfg
+*.local
+
+# Compilados Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Arquivos de log
+*.log
+
+# Banco de dados local
+db.sqlite3
+
+# Arquivos temporários
+*.tmp
+*.swp
+*.swo
+
+# Cache do Django
+*.cache/
+*/migrations/*__pycache__/
+
+# Arquivos gerados pelo editor/IDE
+.vscode/
+.idea/
+*.iml
+
+# Arquivos de build
+build/
+dist/
+*.egg-info/
+
+# Cobertura de testes
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
