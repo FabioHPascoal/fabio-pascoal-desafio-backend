@@ -72,3 +72,26 @@ def transaction_detail(request, id):
     if request.method == 'DELETE':
         transaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ------------------------------------------------------
+# 6. Get summary of all transactions
+#      Endpoint: /summary/
+# ------------------------------------------------------
+@api_view(['GET'])
+def transaction_summary(request):
+    # GET - Get summary of all transactions
+    if request.method == 'GET':
+        transactions = Transaction.objects.all()
+        total_income = 0
+        total_expense = 0
+        for tran in transactions:
+            if tran.type == "income":
+                total_income += tran.amount
+            elif tran.type == "expense":
+                total_expense += tran.amount
+        summary = {
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'net_balance': total_income - total_expense
+        }
+        return Response(summary, status=status.HTTP_200_OK)
