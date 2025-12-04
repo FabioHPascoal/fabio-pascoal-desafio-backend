@@ -1,9 +1,14 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
+
+from django.shortcuts import get_object_or_404
 
 from .models import Transaction
 from .serializers import TransactionSerializer
+from .pagination import TransactionPagination
 
 # ------------------------------------------------------
 # 1. Create new transaction
@@ -11,21 +16,20 @@ from .serializers import TransactionSerializer
 #      Endpoint: /transactions/
 # ------------------------------------------------------
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def transaction_list(request):
 
-    # Post - Create new transaction
+    # POST - Create new transaction
     if request.method == 'POST':
         serializer = TransactionSerializer(data=request.data)
-
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     # GET - List all transactions
     if request.method == 'GET':
-        transactions = Transaction.objects.all()
+        transactions = Transaction.objects.filter(user=request.user).order_by('-date')
 
         description = request.query_params.get("description")
         type_filter = request.query_params.get("type")
@@ -36,6 +40,14 @@ def transaction_list(request):
         if type_filter:
             transactions = transactions.filter(type=type_filter)
 
+        # pagination
+        paginator = TransactionPagination()
+        page = paginator.paginate_queryset(transactions, request)
+        if page is not None:
+            serializer = TransactionSerializer(page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+
+        # fallback
         serializer = TransactionSerializer(transactions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -46,12 +58,9 @@ def transaction_list(request):
 #      Endpoint: /transactions/<id>/
 # ------------------------------------------------------
 @api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
+@permission_classes([IsAuthenticated])
 def transaction_detail(request, id):
-    try:
-        transaction = Transaction.objects.get(pk=id)
-    except Transaction.DoesNotExist:
-        return Response({"error": "Transaction not found."},
-                        status=status.HTTP_404_NOT_FOUND)
+    transaction = get_object_or_404(Transaction, pk=id, user=request.user)
 
     # GET - Get specific transaction
     if request.method == 'GET':
@@ -60,12 +69,11 @@ def transaction_detail(request, id):
 
     # PUT - Update transaction
     if request.method in ['PUT', 'PATCH']:
-        serializer = TransactionSerializer(transaction, data=request.data, partial=(request.method == 'PATCH'))
-
+        partial = (request.method == 'PATCH')
+        serializer = TransactionSerializer(transaction, data=request.data, partial=partial)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # DELETE - Delete transaction
@@ -78,10 +86,11 @@ def transaction_detail(request, id):
 #      Endpoint: /summary/
 # ------------------------------------------------------
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def transaction_summary(request):
-    # GET - Get summary of all transactions
+    # GET - Get summary of all transactions from the authenticated user
     if request.method == 'GET':
-        transactions = Transaction.objects.all()
+        transactions = Transaction.objects.filter(user=request.user)
         total_income = 0
         total_expense = 0
         for tran in transactions:
