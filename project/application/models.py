@@ -2,6 +2,17 @@ from django.conf import settings
 from django.db import models
 
 class Transaction(models.Model):
+    """
+    Represents a financial transaction belonging to a user.
+
+    Attributes:
+        user (User): The owner of the transaction.
+        description (str): A short text describing the transaction.
+        amount (Decimal): The monetary value.
+        type (str): Either 'income' or 'expense'.
+        date (date): The date the transaction occurred.
+    """
+    
     TYPE_CHOICES = [
         ("income", "Income"),
         ("expense", "Expense"),
