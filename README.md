@@ -13,7 +13,7 @@ Uma API REST completa para gerenciamento de transações financeiras (receitas e
 - [Exemplos de Uso](#-exemplos-de-uso)
 - [Estrutura do Projeto](#-estrutura-do-projeto)
 
-## 🛠 Stack utilizada
+## Stack utilizada
 
 * **Python** 3.x
 * **Django** 5
@@ -25,11 +25,11 @@ Uma API REST completa para gerenciamento de transações financeiras (receitas e
 
 ### 1. Clone o repositório
 ```bash
-git clone <seu-repositorio>
+git clone <link para o repositório>
 cd fabio-pascoal-desafio-backend
 ```
 
-### 2. Crie um ambiente virtual (recomendado)
+### 2. Crie um ambiente virtual
 ```bash
 python -m venv venv
 ```
