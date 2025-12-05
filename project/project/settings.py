@@ -37,8 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'application',
     'rest_framework',
-    'application'
+    'rest_framework_simplejwt',
 ]
 
 from datetime import timedelta
